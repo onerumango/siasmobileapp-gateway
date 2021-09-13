@@ -1,0 +1,100 @@
+server:
+  port: 9192
+
+spring:
+ application:
+   name: zuul-gateway
+zuul:
+ sensitiveHeaders: 
+ routes:
+   mobileService:
+     path: "/siasmobileapp/**"
+     serviceId: siasmobileapp
+     sensitiveHeaders:
+ host:
+   maxTotalConnections: 200
+   maxPerRouteConnections: 20
+   
+siasmobileapp:
+  ribbon:
+    NIWSServerListClassName: com.netflix.loadbalancer.ConfigurationBasedServerList
+    listOfServers: http://10.1.0.224:9193/
+    ConnectTimeout: 90000
+    ReadTimeout: 90000
+    MaxTotalHttpConnections: 500
+    MaxConnectionsPerHost: 100
+    maxAutoRetries: 1
+    MaxAutoRetriesNextServer: 2
+
+ribbon:
+ eager-load:
+   enabled: true
+ ConnectTimeout: 30000
+ ReadTimeout: 60000
+ 
+hystrix:
+ command:
+   default:
+     execution:
+       isolation:
+         thread:
+           timeoutInMilliseconds: 600000
+
+
+eureka:
+ client:
+   register-with-eureka: true
+   fetch-registry: true
+   serviceUrl:
+     defaultZone: http://10.1.0.224:9191/discovery/eureka/
+   registryFetchIntervalSeconds: 30
+   instanceInfoReplicationIntervalSeconds: 30
+   initialInstanceInfoReplicationIntervalSeconds: 40
+   eurekaServiceUrlPollIntervalSeconds: 300
+   eurekaServerReadTimeoutSeconds: 8
+   eurekaServerConnectTimeoutSeconds: 5
+   eurekaServerTotalConnections: 200
+   eurekaServerTotalConnectionsPerHost: 50
+   heartbeatExecutorThreadPoolSize: 2
+   heartbeatExecutorExponentialBackOffBound: 10
+   cacheRefreshExecutorThreadPoolSize: 2
+   cacheRefreshExecutorExponentialBackOffBound: 10
+   gZipContent: true
+   preferSameZoneEureka: true
+   filterOnlyUpInstances: true
+   healthcheck:
+     enabled: true
+ instance:
+   preferIpAddress: true
+   leaseRenewalIntervalInSeconds: 30
+   leaseExpirationDurationInSeconds: 90
+   instance-id: ${spring.application.name}:${server.port}:${spring.application.instance_id:${random.value}} 
+   
+   
+logging:
+  level:
+    root: info
+  file:
+    path: /opt/sias/logs/
+    name: /opt/sias/logs/ApiGatewayLog.log
+    max-size: 5MB
+    
+management:
+  endpoint:
+    health:
+      show-details: always
+      enabled: true
+    hystrix:
+      stream:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+      cors:
+        allowed-origins: true
+      base-path: /actuator
+    jmx:
+      exposure:
+        include: '*'
+      

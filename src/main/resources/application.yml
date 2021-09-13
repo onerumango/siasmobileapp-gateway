@@ -1,0 +1,6 @@
+server:  port: 9192
+
+spring:
+ application:
+   name: zuul-gateway
+ profiles:    active: dev
